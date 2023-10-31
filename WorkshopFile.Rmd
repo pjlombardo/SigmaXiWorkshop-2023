@@ -11,9 +11,11 @@ output:
 Begin by loading the necessary packages and necessary data sets.
 ```{r set-up, warning=FALSE, message=FALSE}
 library(tidyverse)
-library(gapminder)
 library(patchwork)
 library(RColorBrewer)
+
+# Gapminder data set, courtesy of the gapminder package
+gapminder<-read.csv('data/gapminder.csv',header=T)
 
 # Courtesy of Kaggle
 spotify<-read.csv('data/spotify-2023.csv',header=T)
@@ -24,6 +26,11 @@ spotify<-spotify %>%
            in_apple_charts,
            danceability_., 
            mode, streams)
+
+# Couresty of ggplot maps and 
+# World Happiness Report
+world_happiness<-read.csv('data/worldHappiness.csv',
+                          header=T)
 
 # Courtesy of five-thirty-eight
 drugUse<-read.csv('data/drug-use-by-age.csv',
@@ -88,6 +95,16 @@ The gapminder data set looks at metrics like life expectancy and national GDP fo
 Let's make a plot consider trends in life expectancy over time by continent.
 ```{r, warning=FALSE, message=FALSE}
 head(gapminder)
+```
+
+
+### Case Stuyd 3b: Map data and World Happiness
+```{r}
+world_map<-ggplot2::map_data("world")
+```
+
+```{r}
+# more code here.
 ```
 
 
