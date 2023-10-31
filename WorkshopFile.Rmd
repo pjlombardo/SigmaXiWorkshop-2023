@@ -50,7 +50,7 @@ head(iris)
 ## Case Study 2: Using `spotify` data to explore plot options and `patchwork` them together
 
 ```{r}
-head(spotify) %>% as_tibble()
+head(spotify)
 ```
 
 
@@ -98,13 +98,13 @@ head(gapminder)
 ```
 
 
-### Case Stuyd 3b: Map data and World Happiness
+### Case Study 3b: Map data and World Happiness
 ```{r}
 world_map<-ggplot2::map_data("world")
 ```
 
 ```{r}
-# more code here.
+# Let's create a map with world_happiness
 ```
 
 
@@ -128,7 +128,7 @@ One tidy format would have `use` and `frequency` as their own columns, with `dru
 ```
 
 ```{r}
-# Let's create a heatmap
+# Let's create a heatmap with geom_tile()
 ```
 
 # Helpful Resources:
