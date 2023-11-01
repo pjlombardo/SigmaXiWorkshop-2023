@@ -105,7 +105,11 @@ world_map<-ggplot2::map_data("world")
 
 ```{r}
 # Let's create a map with world_happiness
+
+# Let's color the map by `Perceptions of Corruption`
+
 ```
+
 
 
 ## Case Study 4: Reshaping and plotting with the `drugUse` data set.
@@ -144,9 +148,11 @@ One tidy format would have `use` and `frequency` as their own columns, with `dru
 
 * [`tidyverse` documentation](https://www.tidyverse.org/)
     * [`ggplot` documentation](https://ggplot2.tidyverse.org/)
+    * [`tidyr documentation`](https://tidyr.tidyverse.org/index.html)
     * [`dplyr` documentation](https://dplyr.tidyverse.org/)
 * [`patchwork` documentation](https://patchwork.data-imaginist.com/)
 * [`gapminder` R package documentation](https://cran.r-project.org/web/packages/gapminder/index.html)
     * [Gapminder organization](https://www.gapminder.org/)
+* [World Happiness Report (data)](https://worldhappiness.report/data/)
 
 
