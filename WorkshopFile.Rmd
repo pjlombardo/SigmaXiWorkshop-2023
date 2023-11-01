@@ -97,6 +97,16 @@ Let's make a plot consider trends in life expectancy over time by continent.
 head(gapminder)
 ```
 
+Summarize first.
+```{r}
+
+```
+
+Make your plot.
+```{r}
+
+```
+
 
 ### Case Study 3b: Map data and World Happiness
 ```{r}

@@ -1,11 +1,13 @@
 ---
 title: "Visualizations in R using the tidyverse"
-subtitle: "Sigma Xi Fall Workshop, 2023"
+subtitle: "Sigma Xi Fall Workshop, 2023 (With Code)"
 author: "P. Lombardo & J. Kaufman"
 output:
   html_document:
     df_print: paged
   html_notebook: default
+fig.width: 8
+fig.height: 4
 ---
 
 Begin by loading the necessary packages and necessary data sets.
@@ -13,6 +15,7 @@ Begin by loading the necessary packages and necessary data sets.
 library(tidyverse)
 library(patchwork)
 library(RColorBrewer)
+knitr::opts_chunk(fig.width=8, fig.height=6)
 
 # Gapminder data set, courtesy of the gapminder package
 gapminder<-read.csv('data/gapminder.csv',header=T)
@@ -46,6 +49,63 @@ drugUse<-read.csv('data/drug-use-by-age.csv',
 head(iris)
 ```
 
+```{r}
+ggplot(data = iris,
+       aes(x = Petal.Width,
+           y = Sepal.Width))+
+    geom_point()+
+    geom_smooth(method="lm", formula=y~x, se = F)+
+    scale_y_continuous(limits=c(0,5))+
+    labs(x="Petal Width (in)",
+         y="Sepal Width (in)",
+         title="Comparing Sepal and Petal Width")+
+    theme_bw()
+```
+
+```{r}
+ggplot(data = iris,
+       aes(x = Petal.Width,
+           y = Sepal.Width,
+           color=Species))+
+    geom_point()+
+    geom_smooth(method="lm", formula=y~x, se = F)+
+    scale_y_continuous(limits=c(0,5))+
+    scale_color_brewer(palette="Set2")+
+    labs(x="Petal Width (in)",
+         y="Sepal Width (in)",
+         title="Comparing Sepal and Petal Width By Species")+
+    theme_bw() 
+```
+
+Piecing them together with `patchwork`
+```{r}
+ggplot(data = iris,
+       aes(x = Petal.Width,
+           y = Sepal.Width))+
+    geom_point()+
+    geom_smooth(method="lm", formula=y~x, se = F)+
+    scale_y_continuous(limits=c(0,5))+
+    labs(x="Petal Width (in)",
+         y="Sepal Width (in)",
+         title="Comparing Sepal and Petal Width")+
+    theme_bw()->p1
+
+ggplot(data = iris,
+       aes(x = Petal.Width,
+           y = Sepal.Width,
+           color=Species))+
+    geom_point()+
+    geom_smooth(method="lm", formula=y~x, se = F)+
+    scale_y_continuous(limits=c(0,5))+
+    scale_color_brewer(palette="Set2")+
+    labs(x="Petal Width (in)",
+         y="Sepal Width (in)",
+         title="Comparing Sepal and Petal Width By Species")+
+    theme_bw() -> p2
+
+p1+p2+plot_annotation(title="Simpson's Paradox",
+                      theme= theme(plot.title = element_text(size = 18)))
+```
 
 ## Case Study 2: Using `spotify` data to explore plot options and `patchwork` them together
 
@@ -58,23 +118,65 @@ head(spotify)
 ```{r}
 # Let's build a histogram together
 # p1
+ggplot(data = spotify,
+       aes(x = danceability_.,
+           fill = mode))+
+    geom_histogram(breaks=seq(20,100,by=10),
+                   position=position_dodge(width=2),
+                   alpha=.5)+
+    scale_x_continuous(breaks=seq(20,100,by=10))+
+    scale_fill_brewer(palette = "Set1",
+                      guide = "none")+
+    labs(x="Danceability Score")+
+    theme_bw()->p1
+    
 ```
 
 **Plot 2: Fancy Violin Plot Example**.
 ```{r}
 # What's a violin plot?
 # p2
+spotify %>%
+    arrange(desc(streams)) %>%
+    mutate(aboveMedian=ifelse(streams > median(streams),"Yes","No")) %>%
+    ggplot(data = .,
+           aes(x = aboveMedian,
+               y = danceability_.))+
+    geom_violin(fill='gray')+
+    geom_point(position=position_jitter(width=.15),
+               alpha=.4,
+               aes(color=mode))+
+    scale_color_brewer("Key Signature Mode",palette = "Set1")+
+    labs(color="Key Signature Mode",
+         y="Danceability Score",
+         x="Total Streams Above Median")+
+    theme_bw()+
+    theme(legend.position="top")-> p2
 ```
 
 **Plot 3: Bar Plot Example**.
 ```{r}
 # how about a simple bar plot...
 # p3
+spotify %>%
+    arrange(desc(streams)) %>%
+    mutate(aboveMedian=ifelse(streams > median(streams),"Yes","No")) %>%
+    ggplot(data = .,
+           aes(x = mode,
+               y = after_stat(count)/sum(after_stat(count)),
+               fill=mode))+
+    geom_bar(alpha= .7)+
+    scale_y_continuous(labels=scales::percent)+
+    scale_fill_brewer("Key Signature Mode",palette = "Set1",
+                      guide = "none")+
+    labs(x="Key Signature Mode",
+         y="Percentage")+
+    theme_bw()->p3
 ```
 
 Simple patchwork options:
 ```{r}
-# (p1+p2)/p3
+(p1+p2)/p3
 ```
 
 More advanced layouts:
@@ -84,7 +186,8 @@ AAAA##
 BBBBCC
 BBBBCC
 "
-# p1+p2+p3 +plot_layout(design=layout)
+p1+p2+p3 +plot_layout(design=layout)+
+    plot_annotation(title = "Spotify Plots")
 ```
 
 
@@ -97,6 +200,45 @@ Let's make a plot consider trends in life expectancy over time by continent.
 head(gapminder)
 ```
 
+Summarize first.
+```{r}
+gapminder %>%
+    group_by(continent,year) %>%
+    summarize(meanLife = mean(lifeExp),
+              sdLife = sd(lifeExp),
+              low = meanLife - 2*sdLife,
+              high = meanLife +2*sdLife,
+              meanPop = mean(pop)/1000000) -> gapminder_summary
+```
+
+Make your plot.
+```{r}
+ggplot(data = gapminder_summary,
+       aes(x = year,
+           y = meanLife,
+           color=continent,
+           group=continent))+
+    geom_point(aes(size = meanPop))+
+    geom_line()+
+    scale_color_brewer("Continent",palette="Set2")+
+    # geom_errorbar(aes(ymin=low,ymax=high),
+    #               alpha=.3,width=1)+
+    # geom_errorbar(aes(ymin=low,ymax=high),
+    #               alpha=.3,width=1,
+    #                 position=position_dodge())+
+    # or use ribbons to show variation
+    # geom_ribbon(aes(ymin=low,ymax=high,fill=continent),
+    # alpha=.1)+
+    scale_fill_brewer("Continent",palette="Set2", guide = "none")+
+    scale_x_continuous(breaks=seq(1950,2020,by=10))+
+    scale_size_continuous("Mean Population\nin Millions")+
+    geom_hline(yintercept=seq(40,80,by=10),
+               col='gray',alpha=.3)+
+    labs(x="Year",
+         y="Mean Life\nExpectancy",
+         title="Time trends in mean life expectancy by continent")+
+    theme_classic()
+```
 
 ### Case Study 3b: Map data and World Happiness
 ```{r}
@@ -105,9 +247,22 @@ world_map<-ggplot2::map_data("world")
 
 ```{r}
 # Let's create a map with world_happiness
-
+ggplot()+
+    geom_polygon(data =world_map,
+       aes(x=long,y=lat,group=group),color='black',
+       fill='gray',alpha=.6)+
 # Let's color the map by `Perceptions of Corruption`
-
+    coord_cartesian(ylim=c(-55,90))+
+    theme_bw()+
+    geom_polygon(data = world_happiness %>% arrange(order),
+                 aes(x=long,y=lat,group=group,
+                     fill=Perceptions.of.corruption))+
+    scale_fill_gradientn("Perception of\nCorruption",colors = rev(brewer.pal(9,name="RdYlBu")),
+                         na.value='black')+
+    labs(x="Longitude", y = "Latitude",
+         title = "Perceptions of Corruption by Country",
+         subtitle = "(Data provided by World happiness Report)",
+         caption = "Note: Antarctica has been removed; penguins are quite happy.")
 ```
 
 
