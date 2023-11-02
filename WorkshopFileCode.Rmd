@@ -15,7 +15,7 @@ Begin by loading the necessary packages and necessary data sets.
 library(tidyverse)
 library(patchwork)
 library(RColorBrewer)
-knitr::opts_chunk(fig.width=8, fig.height=6)
+
 
 # Gapminder data set, courtesy of the gapminder package
 gapminder<-read.csv('data/gapminder.csv',header=T)
@@ -36,7 +36,7 @@ world_happiness<-read.csv('data/worldHappiness.csv',
                           header=T)
 
 # Courtesy of five-thirty-eight
-drugUse<-read.csv('data/drug-use-by-age.csv',
+druguse<-read.csv('data/drug-use-by-age.csv',
                   header=T,
                   na.strings = "-")
 ```
@@ -201,7 +201,7 @@ head(gapminder)
 ```
 
 Summarize first.
-```{r}
+```{r message=FALSE}
 gapminder %>%
     group_by(continent,year) %>%
     summarize(meanLife = mean(lifeExp),
@@ -232,12 +232,22 @@ ggplot(data = gapminder_summary,
     scale_fill_brewer("Continent",palette="Set2", guide = "none")+
     scale_x_continuous(breaks=seq(1950,2020,by=10))+
     scale_size_continuous("Mean Population\nin Millions")+
+    # scale_size_continuous("Mean Population\ninMillions",
+            # guide = guide_legend(override.aes = list(color = "white")))+
     geom_hline(yintercept=seq(40,80,by=10),
                col='gray',alpha=.3)+
     labs(x="Year",
          y="Mean Life\nExpectancy",
          title="Time trends in mean life expectancy by continent")+
     theme_classic()
+    # theme(text = element_text(color="white"),
+    #       plot.title = element_text(size = 16),
+    #       axis.text= element_text(color="white"),
+    #       plot.background = element_rect(fill = "gray12"),
+    #       legend.background = element_rect(fill ="gray12"),
+    #       panel.background = element_rect(fill = "gray12",
+    #                             colour = "gray",
+    #                             size = 0.5, linetype = "solid"))
 ```
 
 ### Case Study 3b: Map data and World Happiness
@@ -248,7 +258,7 @@ world_map<-ggplot2::map_data("world")
 ```{r}
 # Let's create a map with world_happiness
 ggplot()+
-    geom_polygon(data =world_map,
+    geom_polygon(data =world_happiness %>% arrange(order),
        aes(x=long,y=lat,group=group),color='black',
        fill='gray',alpha=.6)+
 # Let's color the map by `Perceptions of Corruption`
@@ -262,7 +272,7 @@ ggplot()+
     labs(x="Longitude", y = "Latitude",
          title = "Perceptions of Corruption by Country",
          subtitle = "(Data provided by World happiness Report)",
-         caption = "Note: Antarctica has been removed; penguins are quite happy.")
+         caption = "Note: Antarctica has been removed, but rest assured\n that penguins are generally pretty happy.")
 ```
 
 
@@ -270,16 +280,23 @@ ggplot()+
 ## Case Study 4: Reshaping and plotting with the `drugUse` data set.
 
 ```{r}
-head(drugUse)
+head(druguse)
 ```
 
 Columns display the same measurements (`use` as percentage of the age group that used in the 12-month period, and `frequency` as the median number of times an individual used in the 12-month period), but categories are split among columns.
 
 One tidy format would have `use` and `frequency` as their own columns, with `drug_type` as indicating the type of drug.
 
+
 ```{r}
-?pivot_longer
-?pivot_wider
+# ?pivot_longer
+# ?pivot_wider
+druguse %>%
+    pivot_longer(cols = -c(age,n),
+                 names_pattern = "(.*)_(.*)",
+                 names_to=c("drug_type","measurement")) %>%
+    pivot_wider(names_from = measurement,
+                values_from = value)->drugusetidy
 ```
 
 ```{r}
@@ -288,6 +305,22 @@ One tidy format would have `use` and `frequency` as their own columns, with `dru
 
 ```{r}
 # Let's create a heatmap with geom_tile()
+drugusetidy %>%
+    # filter(drug_type %in% c("alcohol","marijuana","meth")) %>%
+    ggplot(data =.,
+           aes(x = age,
+               y=drug_type,
+               fill=use))+
+    geom_tile()+
+    scale_fill_gradientn("Percentage Of\nAge Group Using\nIn The Past Year",
+                         colors = brewer.pal(9,name="YlOrRd"))+
+    theme(axis.text.x = element_text(angle = 60, hjust=1))+
+    labs(x="Age Group",
+         y="Drug Type",
+         title="Drug-use Percentages by Age")+
+    theme(plot.background = element_rect(fill="gray"),
+          legend.background = element_rect(fill="gray"))
+    
 ```
 
 # Helpful Resources:

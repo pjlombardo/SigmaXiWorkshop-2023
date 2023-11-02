@@ -108,7 +108,7 @@ Make your plot.
 ```
 
 
-### Case Study 3b: Map data and World Happiness
+## Case Study 4: Map data and World Happiness
 ```{r}
 world_map<-ggplot2::map_data("world")
 ```
@@ -122,7 +122,7 @@ world_map<-ggplot2::map_data("world")
 
 
 
-## Case Study 4: Reshaping and plotting with the `drugUse` data set.
+## Case Study 5: Reshaping and plotting with the `drugUse` data set.
 
 ```{r}
 head(drugUse)
