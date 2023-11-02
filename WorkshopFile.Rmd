@@ -56,8 +56,18 @@ Let's build our plot!
 
 ```
 
+Let's improve our plot!
+```{r}
+
+```
+
 ```{r}
 # display.brewer.all()
+```
+
+Demonstrating Simpson's Paradox.
+```{r}
+# place code here
 ```
 
 
