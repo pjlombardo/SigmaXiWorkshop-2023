@@ -24,12 +24,12 @@ gapminder<-read.csv('data/gapminder.csv',header=T)
 spotify<-read.csv('data/spotify-2023.csv',header=T)
     # Select only certain variables
 spotify<-spotify %>%
+    mutate(danceability=danceability_.) %>%
     select(track_name,artist.s._name,
            released_year,
            in_apple_charts,
-           danceability_., 
+           danceability, 
            mode, streams)
-
 # Couresty of ggplot maps and 
 # World Happiness Report
 world_happiness<-read.csv('data/worldHappiness.csv',
@@ -45,6 +45,8 @@ druguse<-read.csv('data/drug-use-by-age.csv',
 # Workshop Examples
 
 ## Case Study 1: Incrementally building plots with the `iris` data set.
+The `iris` data set is pre-loaded in `R`, and a very common data set for statistics, data science, and data visualization.
+
 ```{r}
 head(iris)
 ```
@@ -109,6 +111,8 @@ p1+p2+plot_annotation(title="Simpson's Paradox",
 
 ## Case Study 2: Using `spotify` data to explore plot options and `patchwork` them together
 
+Here is our data set: [Spotify songs 2023 (Kaggle)](https://www.kaggle.com/datasets/nelgiriyewithana/top-spotify-songs-2023).
+
 ```{r}
 head(spotify)
 ```
@@ -119,7 +123,7 @@ head(spotify)
 # Let's build a histogram together
 # p1
 ggplot(data = spotify,
-       aes(x = danceability_.,
+       aes(x = danceability,
            fill = mode))+
     geom_histogram(breaks=seq(20,100,by=10),
                    position=position_dodge(width=2),
@@ -133,6 +137,8 @@ ggplot(data = spotify,
 ```
 
 **Plot 2: Fancy Violin Plot Example**.
+Let's look at popularity by adding a new variable, `aboveMedian`. This variable will have "Yes" if the song has more streams than the median number of streams, and "No" otherwise.
+
 ```{r}
 # What's a violin plot?
 # p2
@@ -141,7 +147,7 @@ spotify %>%
     mutate(aboveMedian=ifelse(streams > median(streams),"Yes","No")) %>%
     ggplot(data = .,
            aes(x = aboveMedian,
-               y = danceability_.))+
+               y = danceability))+
     geom_violin(fill='gray')+
     geom_point(position=position_jitter(width=.15),
                alpha=.4,
@@ -158,10 +164,7 @@ spotify %>%
 ```{r}
 # how about a simple bar plot...
 # p3
-spotify %>%
-    arrange(desc(streams)) %>%
-    mutate(aboveMedian=ifelse(streams > median(streams),"Yes","No")) %>%
-    ggplot(data = .,
+ggplot(data = spotify,
            aes(x = mode,
                y = after_stat(count)/sum(after_stat(count)),
                fill=mode))+
@@ -193,14 +196,19 @@ p1+p2+p3 +plot_layout(design=layout)+
 
 ## Case Study 3: Plotting summary data with the `gapminder` data set
 
-The gapminder data set looks at metrics like life expectancy and national GDP for several nations around the world over time. 
+The gapminder data set looks at metrics like life expectancy and national GDP for several nations around the world over time. The data here is borrowed directly from the [`gapminder` R package](https://cran.r-project.org/web/packages/gapminder/index.html), but more data sets are available at the [Gapminder organization](https://www.gapminder.org/) website.
+
 
 Let's make a plot consider trends in life expectancy over time by continent.
 ```{r, warning=FALSE, message=FALSE}
 head(gapminder)
 ```
 
-Summarize first.
+We first need to make a data frame of summaries that give us our plotting elements:
+
+* mean life expectancy (and standard deviation, with `low` whisker and `high` wisker if you want errorbars)
+* mean population, measured in millions.
+
 ```{r message=FALSE}
 gapminder %>%
     group_by(continent,year) %>%
@@ -220,26 +228,32 @@ ggplot(data = gapminder_summary,
            group=continent))+
     geom_point(aes(size = meanPop))+
     geom_line()+
-    scale_color_brewer("Continent",palette="Set2")+
     # geom_errorbar(aes(ymin=low,ymax=high),
     #               alpha=.3,width=1)+
-    # geom_errorbar(aes(ymin=low,ymax=high),
-    #               alpha=.3,width=1,
-    #                 position=position_dodge())+
+    
     # or use ribbons to show variation
+    
     # geom_ribbon(aes(ymin=low,ymax=high,fill=continent),
-    # alpha=.1)+
+    #             alpha=.1)+
+    
     scale_fill_brewer("Continent",palette="Set2", guide = "none")+
+    
     scale_x_continuous(breaks=seq(1950,2020,by=10))+
+    
     scale_size_continuous("Mean Population\nin Millions")+
+    
+    # Alternate scale for "Dark mode"
     # scale_size_continuous("Mean Population\ninMillions",
             # guide = guide_legend(override.aes = list(color = "white")))+
+    
     geom_hline(yintercept=seq(40,80,by=10),
                col='gray',alpha=.3)+
     labs(x="Year",
          y="Mean Life\nExpectancy",
          title="Time trends in mean life expectancy by continent")+
     theme_classic()
+
+    # Futher theme elements can change this to "dark mode", e.g.
     # theme(text = element_text(color="white"),
     #       plot.title = element_text(size = 16),
     #       axis.text= element_text(color="white"),
@@ -250,23 +264,24 @@ ggplot(data = gapminder_summary,
     #                             size = 0.5, linetype = "solid"))
 ```
 
-### Case Study 3b: Map data and World Happiness
+## Case Study 4: Map data and World Happiness
+Part of our data comes from here: [World Happiness Report (data)](https://worldhappiness.report/data/).
+
+We mixed this happiness report with latitude and longitude data from ggplot, specifically `ggplot2::map_data("world")`.
+
 ```{r}
-world_map<-ggplot2::map_data("world")
+head(world_happiness)
 ```
 
 ```{r}
 # Let's create a map with world_happiness
-ggplot()+
-    geom_polygon(data =world_happiness %>% arrange(order),
-       aes(x=long,y=lat,group=group),color='black',
-       fill='gray',alpha=.6)+
-# Let's color the map by `Perceptions of Corruption`
+ggplot(data =world_happiness %>% arrange(order),
+       aes(x=long,y=lat,
+           group=group,
+           fill=Perceptions.of.corruption))+
+    geom_polygon(color='black',alpha=.6,linewidth=.1)+
     coord_cartesian(ylim=c(-55,90))+
     theme_bw()+
-    geom_polygon(data = world_happiness %>% arrange(order),
-                 aes(x=long,y=lat,group=group,
-                     fill=Perceptions.of.corruption))+
     scale_fill_gradientn("Perception of\nCorruption",colors = rev(brewer.pal(9,name="RdYlBu")),
                          na.value='black')+
     labs(x="Longitude", y = "Latitude",
@@ -277,7 +292,9 @@ ggplot()+
 
 
 
-## Case Study 4: Reshaping and plotting with the `drugUse` data set.
+## Case Study 5: Reshaping and plotting with the `drugUse` data set.
+
+Here is our data set: [druge-use data set](https://github.com/fivethirtyeight/data/tree/master/drug-use-by-age)
 
 ```{r}
 head(druguse)
@@ -287,10 +304,19 @@ Columns display the same measurements (`use` as percentage of the age group that
 
 One tidy format would have `use` and `frequency` as their own columns, with `drug_type` as indicating the type of drug.
 
+Our steps will be:
 
+1. Use pivot longer on all columns *except* `age` and `n`.
+2. Use the `names_pattern` argument to split these column titles by drug type and measurement type ("use" versus "frequency")
+3. Then we will pivot wider to put `use` and `frequency` as their own variables.
+
+Let's build our data frame!
 ```{r}
+# Documenation:
 # ?pivot_longer
 # ?pivot_wider
+
+
 druguse %>%
     pivot_longer(cols = -c(age,n),
                  names_pattern = "(.*)_(.*)",
@@ -299,9 +325,6 @@ druguse %>%
                 values_from = value)->drugusetidy
 ```
 
-```{r}
-# display.brewer.all()
-```
 
 ```{r}
 # Let's create a heatmap with geom_tile()
@@ -309,8 +332,8 @@ drugusetidy %>%
     # filter(drug_type %in% c("alcohol","marijuana","meth")) %>%
     ggplot(data =.,
            aes(x = age,
-               y=drug_type,
-               fill=use))+
+               y = drug_type,
+               fill = use))+
     geom_tile()+
     scale_fill_gradientn("Percentage Of\nAge Group Using\nIn The Past Year",
                          colors = brewer.pal(9,name="YlOrRd"))+

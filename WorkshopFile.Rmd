@@ -6,6 +6,8 @@ output:
   html_document:
     df_print: paged
   html_notebook: default
+fig.width: 8
+fig.height: 4
 ---
 
 Begin by loading the necessary packages and necessary data sets.
@@ -21,10 +23,11 @@ gapminder<-read.csv('data/gapminder.csv',header=T)
 spotify<-read.csv('data/spotify-2023.csv',header=T)
     # Select only certain variables
 spotify<-spotify %>%
+    mutate(danceability=danceability_.) %>%
     select(track_name,artist.s._name,
            released_year,
            in_apple_charts,
-           danceability_., 
+           danceability, 
            mode, streams)
 
 # Couresty of ggplot maps and 
@@ -42,12 +45,25 @@ drugUse<-read.csv('data/drug-use-by-age.csv',
 # Workshop Examples
 
 ## Case Study 1: Incrementally building plots with the `iris` data set.
+The `iris` data set is pre-loaded in `R`, and a very common data set for statistics, data science, and data visualization.
+
 ```{r}
 head(iris)
 ```
 
+Let's build our plot!
+```{r}
+
+```
+
+```{r}
+# display.brewer.all()
+```
+
 
 ## Case Study 2: Using `spotify` data to explore plot options and `patchwork` them together
+
+Here is our data set: [Spotify songs 2023 (Kaggle)](https://www.kaggle.com/datasets/nelgiriyewithana/top-spotify-songs-2023).
 
 ```{r}
 head(spotify)
@@ -58,18 +74,48 @@ head(spotify)
 ```{r}
 # Let's build a histogram together
 # p1
+ggplot(data = spotify,
+       aes(x = ... )+
+    geom_histogram()
 ```
 
 **Plot 2: Fancy Violin Plot Example**.
+Let's look at popularity by adding a new variable, `aboveMedian`. This variable will have "Yes" if the song has more streams than the median number of streams, and "No" otherwise. 
+
+Next, we'll plot a violin plot, the love-child of a box-plot and a histogram!
+
 ```{r}
 # What's a violin plot?
 # p2
+spotify %>%
+    mutate()
+    # ggplot()+
+    #     geom_violin()
+    # Some more code
+
+
+    # scale_color_brewer("Key Signature Mode",palette = "Set1")+
+    #     labs(color="Key Signature Mode",
+    #          y="Danceability Score",
+    #          x="Total Streams Above Median")+
+    #     theme_bw()+
+    #     theme(legend.position="top")
 ```
 
 **Plot 3: Bar Plot Example**.
 ```{r}
 # how about a simple bar plot...
 # p3
+# ggplot(data = spotify,
+#            aes())+
+#     geom_bar()
+# More code coming
+
+    # scale_fill_brewer("Key Signature Mode",palette = "Set1",
+    #                       guide = "none")+
+    #     labs(x="Key Signature Mode",
+    #          y="Percentage")+
+    #     theme_bw()
 ```
 
 Simple patchwork options:
@@ -84,45 +130,91 @@ AAAA##
 BBBBCC
 BBBBCC
 "
-# p1+p2+p3 +plot_layout(design=layout)
+# p1+p2+p3 +plot_layout(design=layout) +
+#     plot_annotation(title = "Spotify Plots")
 ```
 
 
 ## Case Study 3: Plotting summary data with the `gapminder` data set
 
-The gapminder data set looks at metrics like life expectancy and national GDP for several nations around the world over time. 
+The gapminder data set looks at metrics like life expectancy and national GDP for several nations around the world over time. The data here is borrowed directly from the [`gapminder` R package](https://cran.r-project.org/web/packages/gapminder/index.html), but more data sets are available at the [Gapminder organization](https://www.gapminder.org/) website.
 
 Let's make a plot consider trends in life expectancy over time by continent.
 ```{r, warning=FALSE, message=FALSE}
 head(gapminder)
 ```
 
-Summarize first.
-```{r}
+We first need to make a data frame of summaries that give us our plotting elements:
 
+* mean life expectancy (and standard deviation, with `low` whisker and `high` wisker if you want errorbars)
+* mean population, measured in millions.
+
+```{r}
+gapminder %>%
+    group_by(...) %>%
+    summarize(...)
 ```
 
-Make your plot.
+Let's make our plot!
 ```{r}
+ggplot(data = gapminder_summary,
+       aes(x = ...,
+           y = ...,
+           color=...,
+           group=...))+
+    geom_point()+
+    geom_line()
+    # More code below (geom_errobar and geom_ribbon for variation)
 
+
+    # labs(x="Year",
+    #      y="Mean Life\nExpectancy",
+    #      title="Time trends in mean life expectancy by continent")+
+    # theme_classic()
+
+    # Futher theme elements can change this to "dark mode", e.g.
+    # theme(text = element_text(color="white"),
+    #       plot.title = element_text(size = 16),
+    #       axis.text= element_text(color="white"),
+    #       plot.background = element_rect(fill = "gray12"),
+    #       legend.background = element_rect(fill ="gray12"),
+    #       panel.background = element_rect(fill = "gray12",
+    #                             colour = "gray",
+    #                             size = 0.5, linetype = "solid"))
 ```
 
 
 ## Case Study 4: Map data and World Happiness
+Part of our data comes from here: [World Happiness Report (data)](https://worldhappiness.report/data/).
+
+We mixed this happiness report with latitude and longitude data from ggplot, specifically `ggplot2::map_data("world")`.
+
 ```{r}
-world_map<-ggplot2::map_data("world")
+head(world_happiness)
 ```
 
+Let's start by building a world map first, then we'll color the countries according to there `Perceptions.of.corruption`.
 ```{r}
-# Let's create a map with world_happiness
+ggplot(data = world_happiness %>% arrange(order),
+       aes(...))+
+    geom_polygon(color="black") # adjust alpha and linewidth
+    # More code here...
 
-# Let's color the map by `Perceptions of Corruption`
-
+    # For continuous color or fill scales, use...
+    # scale_fill_gradientn("Perception of\nCorruption",
+    #                      colors = brewer.pal(...),
+    #                      na.value=...)
+    # theme_bw()+
+    # labs(x="Longitude", y = "Latitude",
+    #          title = "Perceptions of Corruption by Country",
+    #          subtitle = "(Data provided by World happiness Report)")
 ```
 
 
 
 ## Case Study 5: Reshaping and plotting with the `drugUse` data set.
+
+Here is our data set: [druge-use data set](https://github.com/fivethirtyeight/data/tree/master/drug-use-by-age)
 
 ```{r}
 head(drugUse)
@@ -132,17 +224,38 @@ Columns display the same measurements (`use` as percentage of the age group that
 
 One tidy format would have `use` and `frequency` as their own columns, with `drug_type` as indicating the type of drug.
 
+Our steps will be:
+
+1. Use pivot longer on all columns *except* `age` and `n`.
+2. Use the `names_pattern` argument to split these column titles by drug type and measurement type ("use" versus "frequency")
+3. Then we will pivot wider to put `use` and `frequency` as their own variables.
+
+For those interested in the documentation:
 ```{r}
 ?pivot_longer
 ?pivot_wider
 ```
 
+Let's build our data frame!
 ```{r}
-# display.brewer.all()
+
 ```
+
 
 ```{r}
 # Let's create a heatmap with geom_tile()
+ggplot(data = ...,
+       aes(...)) +
+    geom_tile()
+    # More code below
+
+    # labs(x="Age Group",
+         y="Drug Type",
+         title="Drug-use Percentages by Age")
+    # Can adjust outer background color to make the colors
+    # easier to see
+    # theme(...)
+
 ```
 
 # Helpful Resources:
@@ -151,8 +264,10 @@ One tidy format would have `use` and `frequency` as their own columns, with `dru
 
 * [Kaggle data sets](https://www.kaggle.com/datasets)
     * [Spotify songs 2023 (Kaggle)](https://www.kaggle.com/datasets/nelgiriyewithana/top-spotify-songs-2023)
+* [World Happiness Report (data)](https://worldhappiness.report/data/)
 * [five-thirty-eight data (github)](https://github.com/fivethirtyeight/data)
     * [druge-use data set](https://github.com/fivethirtyeight/data/tree/master/drug-use-by-age)
+
 
 ## Package documentation
 
@@ -163,6 +278,6 @@ One tidy format would have `use` and `frequency` as their own columns, with `dru
 * [`patchwork` documentation](https://patchwork.data-imaginist.com/)
 * [`gapminder` R package documentation](https://cran.r-project.org/web/packages/gapminder/index.html)
     * [Gapminder organization](https://www.gapminder.org/)
-* [World Happiness Report (data)](https://worldhappiness.report/data/)
+
 
 
