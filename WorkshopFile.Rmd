@@ -22,8 +22,9 @@ gapminder<-read.csv('data/gapminder.csv',header=T)
 # Courtesy of Kaggle
 spotify<-read.csv('data/spotify-2023.csv',header=T)
     # Select only certain variables
+names(spotify) <- gsub(x = names(spotify), pattern = "\\_\\.$", replacement = "") 
+
 spotify<-spotify %>%
-    mutate(danceability=danceability_.) %>%
     select(track_name,artist.s._name,
            released_year,
            in_apple_charts,
@@ -39,6 +40,7 @@ world_happiness<-read.csv('data/worldHappiness.csv',
 drugUse<-read.csv('data/drug-use-by-age.csv',
                   header=T,
                   na.strings = "-")
+druguse[,3:28] <- sapply(druguse[,3:28],as.numeric)
 ```
 
 
