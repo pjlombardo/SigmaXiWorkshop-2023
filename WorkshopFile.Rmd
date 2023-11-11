@@ -285,6 +285,7 @@ ggplot(data = ...,
 
 * [`tidyverse` documentation](https://www.tidyverse.org/)
     * [`ggplot` documentation](https://ggplot2.tidyverse.org/)
+    * [ggplot book (anchored to maps)](https://ggplot2-book.org/maps.html)
     * [`tidyr documentation`](https://tidyr.tidyverse.org/index.html)
     * [`dplyr` documentation](https://dplyr.tidyverse.org/)
 * [`patchwork` documentation](https://patchwork.data-imaginist.com/)

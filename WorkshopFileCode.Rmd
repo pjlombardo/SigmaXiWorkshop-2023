@@ -40,7 +40,7 @@ druguse<-read.csv('data/drug-use-by-age.csv',
                   header=T,
                   na.strings = "-")
 
-drugUse[,3:28] <- sapply(drugUse[,3:28],as.numeric)
+druguse[,3:28] <- sapply(druguse[,3:28],as.numeric)
 ```
 
 
@@ -52,6 +52,7 @@ The `iris` data set is pre-loaded in `R`, and a very common data set for statist
 ```{r}
 head(iris)
 ```
+
 
 ```{r}
 ggplot(data = iris,
@@ -275,6 +276,8 @@ We mixed this happiness report with latitude and longitude data from ggplot, spe
 head(world_happiness)
 ```
 
+
+
 ```{r}
 # Let's create a map with world_happiness
 ggplot(data =world_happiness %>% arrange(order),
@@ -361,6 +364,7 @@ drugusetidy %>%
 
 * [`tidyverse` documentation](https://www.tidyverse.org/)
     * [`ggplot` documentation](https://ggplot2.tidyverse.org/)
+    * [ggplot book (anchored to maps)](https://ggplot2-book.org/maps.html)
     * [`tidyr documentation`](https://tidyr.tidyverse.org/index.html)
     * [`dplyr` documentation](https://dplyr.tidyverse.org/)
 * [`patchwork` documentation](https://patchwork.data-imaginist.com/)
