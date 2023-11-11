@@ -40,7 +40,7 @@ world_happiness<-read.csv('data/worldHappiness.csv',
 drugUse<-read.csv('data/drug-use-by-age.csv',
                   header=T,
                   na.strings = "-")
-druguse[,3:28] <- sapply(druguse[,3:28],as.numeric)
+drugUse[,3:28] <- sapply(drugUse[,3:28],as.numeric)
 ```
 
 
